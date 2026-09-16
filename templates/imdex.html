@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AstroBot — Space Study Assistant</title>
+<style>
+:root{--bg:#070b17;--panel:#0d1426;--line:#22304c;--text:#eef4ff;--muted:#9aa9c4;--accent:#7c8cff;--accent2:#40d9ff}
+*{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,sans-serif;background:radial-gradient(circle at 20% 10%,#18265a 0,#070b17 35%),#070b17;color:var(--text);height:100vh;overflow:hidden}
+.app{height:100vh;display:flex;flex-direction:column;max-width:1100px;margin:auto}
+header{padding:22px 26px;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--line);background:#070b17cc;backdrop-filter:blur(14px)}
+.logo{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 0 30px #6d7cff55;font-size:22px}
+h1{font-size:18px;margin:0} .sub{font-size:12px;color:var(--muted);margin-top:3px}
+main{flex:1;overflow:auto;padding:28px 18px} .welcome{max-width:720px;margin:9vh auto 30px;text-align:center}
+.welcome h2{font-size:42px;letter-spacing:-1.5px;margin:0 0 12px} .welcome p{color:var(--muted);line-height:1.7}
+.suggestions{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:22px} .chip{border:1px solid var(--line);background:#0d1426aa;color:#cbd6ec;border-radius:999px;padding:10px 14px;cursor:pointer}
+.chat{max-width:760px;margin:auto} .msg{display:flex;margin:18px 0} .msg.user{justify-content:flex-end} .bubble{max-width:80%;padding:13px 16px;border-radius:18px;line-height:1.6;white-space:pre-wrap}
+.bot .bubble{background:var(--panel);border:1px solid var(--line);border-top-left-radius:6px} .user .bubble{background:linear-gradient(135deg,#5968dc,#4e8be8);border-top-right-radius:6px}
+footer{padding:16px 18px 20px;border-top:1px solid var(--line);background:#070b17cc;backdrop-filter:blur(14px)}
+.composer{max-width:760px;margin:auto;display:flex;gap:10px;background:var(--panel);border:1px solid var(--line);padding:8px;border-radius:20px}
+input{flex:1;background:transparent;border:0;outline:0;color:var(--text);padding:12px;font-size:15px} button{border:0;border-radius:14px;background:var(--accent);color:white;padding:0 18px;cursor:pointer;font-weight:700}
+@media(max-width:600px){.welcome h2{font-size:32px} .bubble{max-width:90%} header{padding:17px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header><div class="logo">✦</div><div><h1>AstroBot</h1><div class="sub">Astronomy & Space Study Assistant</div></div></header>
+<main id="main"><section class="welcome" id="welcome"><h2>Explore the universe.</h2><p>Ask study questions about planets, stars, galaxies, missions, spacecraft, cosmology, and space science.</p>
+<div class="suggestions"><button class="chip" onclick="usePrompt(this)">Why do stars shine?</button><button class="chip" onclick="usePrompt(this)">Explain a black hole simply</button><button class="chip" onclick="usePrompt(this)">How do space telescopes work?</button></div></section><div class="chat" id="chat"></div></main>
+<footer><form class="composer" id="form"><input id="input" autocomplete="off" placeholder="Ask an astronomy question..." /><button>Send</button></form></footer>
+</div>
+<script>
+const form=document.getElementById("form"), input=document.getElementById("input"), chat=document.getElementById("chat"), welcome=document.getElementById("welcome");
+function usePrompt(el){input.value=el.textContent;input.focus();}
+function add(role,text){const row=document.createElement("div");row.className="msg "+role;const b=document.createElement("div");b.className="bubble";b.textContent=text;row.appendChild(b);chat.appendChild(row);document.getElementById("main").scrollTop=document.getElementById("main").scrollHeight;}
+form.addEventListener("submit",async e=>{e.preventDefault();const message=input.value.trim();if(!message)return;welcome.style.display="none";add("user",message);input.value="";add("bot","Thinking...");const last=chat.lastElementChild.querySelector(".bubble");try{const r=await fetch("/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message})});const data=await r.json();last.textContent=data.reply||data.error||"No response."}catch{last.textContent="Connection error. Please try again."}});
+</script>
+</body>
+</html>
